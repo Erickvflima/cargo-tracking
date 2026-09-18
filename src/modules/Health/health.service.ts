@@ -1,4 +1,4 @@
-import { Env } from '@env';
+import { Env } from '@utils/env';
 import { IBaseResponse } from '@interface/baseResponse';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
