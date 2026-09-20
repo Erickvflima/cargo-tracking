@@ -1,3 +1,4 @@
+import { UserRole } from '@common/enums/roles';
 import { handleError } from '@common/errors/handle-error.util';
 import { IBaseResponse } from '@interface/baseResponse';
 import { UserEntity } from '@modules/User/entities/user.entity';
@@ -17,6 +18,7 @@ export class UserService {
     email: string,
     password: string,
     tenantId: number,
+    role: UserRole,
   ): Promise<IBaseResponse<UserEntity>> {
     try {
       const exists = await this.userRepository.findOne({
@@ -33,6 +35,7 @@ export class UserService {
         email,
         password: hashedPassword,
         tenantId,
+        role,
         createdBy: 'SYSTEM',
       });
 
@@ -44,7 +47,6 @@ export class UserService {
         document: saved,
       };
     } catch (error) {
-      console.log(error);
       throw handleError(error, 'Error creating user');
     }
   }

@@ -9,6 +9,8 @@ import {
 import { CargoService } from './cargo.service';
 import { AuthenticatedRequest } from '@interface/iAuthenticatedUser';
 import { CreateCargoDto } from './dto/create-cargo.dto';
+import { Roles } from '@common/decorators/roles.decorator';
+import { UserRole } from '@common/enums/roles';
 
 @ApiTags('Cargo')
 @ApiBearerAuth('access-token')
@@ -17,6 +19,7 @@ export class CargoController {
   constructor(private readonly cargoService: CargoService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.OPERATOR)
   @ApiOperation({
     summary: 'Create a cargo',
     description:
@@ -35,6 +38,7 @@ export class CargoController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
   @ApiOperation({
     summary: 'List cargos',
     description:

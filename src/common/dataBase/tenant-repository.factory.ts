@@ -23,8 +23,6 @@ export class TenantRepositoryFactory implements OnModuleDestroy {
   }
 
   private async getDataSource(schema: string): Promise<DataSource> {
-    console.log('TENANT SCHEMA:', schema);
-
     const existingDataSource = this.dataSources.get(schema);
 
     if (existingDataSource?.isInitialized) {

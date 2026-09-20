@@ -1,4 +1,5 @@
 import { BaseEntity } from '@common/dataBase/base.entity';
+import { UserRole } from '@common/enums/roles';
 import { Entity, Column, Unique } from 'typeorm';
 
 @Entity({
@@ -17,4 +18,10 @@ export class UserEntity extends BaseEntity {
     name: 'tenant_id',
   })
   tenantId: number;
+
+  @Column({
+    length: 20,
+    default: UserRole.VIEWER,
+  })
+  role: UserRole;
 }

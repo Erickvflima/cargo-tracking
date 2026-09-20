@@ -45,7 +45,7 @@ export class AuthController {
     },
   })
   async signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto.email, dto.password, dto.tenantId);
+    return this.authService.signup(dto);
   }
 
   @Public()

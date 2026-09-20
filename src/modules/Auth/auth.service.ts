@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcrypt';
+import { SignupDto } from './dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,11 +21,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signup(
-    email: string,
-    password: string,
-    tenantId: number,
-  ): Promise<IBaseResponse> {
+  async signup({
+    email,
+    password,
+    tenantId,
+    role,
+  }: SignupDto): Promise<IBaseResponse> {
     try {
       const tenantResult = await this.tenantService.findById(tenantId);
 
@@ -36,6 +38,7 @@ export class AuthService {
         email,
         password,
         tenantResult.data.id,
+        role,
       );
 
       if (result.status !== 'success') {
@@ -81,7 +84,12 @@ export class AuthService {
 
   private generateToken(user: UserEntity, tenantId: number): IBaseResponse {
     try {
-      const payload = { sub: user.id, email: user.email, tenantId };
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        tenantId,
+        role: user.role,
+      };
 
       return {
         status: 'success',
