@@ -10,6 +10,7 @@ import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { AuthModule } from '@modules/Auth/auth.module';
 import { TenantModule } from '@modules/Tenant/tenant.module';
 import { RolesGuard } from '@common/guards/roles.guard';
+import { GeolocationModule } from '@modules/Geolocation/geolocation.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
     TenantModule,
     HealthModule,
     TrackingModule,
+    GeolocationModule,
   ],
   providers: [
     {
