@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CargoEntity } from './entities/cargo.entity';
 import { CargoController } from './cargo.controller';
 import { CargoService } from './cargo.service';
+import { TenantModule } from '@modules/Tenant/tenant.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CargoEntity])],
+  imports: [TenantModule],
   controllers: [CargoController],
   providers: [CargoService],
 })

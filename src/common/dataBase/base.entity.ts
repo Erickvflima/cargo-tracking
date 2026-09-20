@@ -12,17 +12,22 @@ export abstract class BaseEntity {
   @CreateDateColumn({
     name: 'created_at',
     type: 'datetime2',
+    default: () => 'GETDATE()',
   })
   createdAt: Date;
 
   @Column({
     name: 'created_by',
+    type: 'nvarchar',
+    length: 255,
   })
   createdBy: string;
 
   @Column({
     name: 'updated_by',
     nullable: true,
+    type: 'nvarchar',
+    length: 255,
   })
   updatedBy: string | null;
 

@@ -15,7 +15,8 @@
     "rootDirs": ["./src", "."],
     "paths": {
       "@*": ["./src/*"],
-      "@modules/*": ["src/modules/*"]
+      "@modules/*": ["src/modules/*"],
+      "@config/*": ["src/config/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

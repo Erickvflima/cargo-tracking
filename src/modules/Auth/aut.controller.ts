@@ -40,8 +40,8 @@ export class AuthController {
       },
     },
   })
-  signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto.email);
+  async signup(@Body() dto: SignupDto) {
+    return this.authService.signup(dto.email, dto.password, dto.tenantId);
   }
 
   @Public()
@@ -68,7 +68,7 @@ export class AuthController {
       },
     },
   })
-  signin(@Body() dto: SigninDto) {
-    return this.authService.signin(dto.email);
+  async signin(@Body() dto: SigninDto) {
+    return this.authService.signin(dto.email, dto.password);
   }
 }

@@ -8,6 +8,7 @@ import { createDataSource } from '@config/data.source';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { AuthModule } from '@modules/Auth/auth.module';
+import { TenantModule } from '@modules/Tenant/tenant.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { AuthModule } from '@modules/Auth/auth.module';
       },
     }),
     AuthModule,
+    TenantModule,
     HealthModule,
     CargoModule,
   ],
