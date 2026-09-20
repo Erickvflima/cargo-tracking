@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { envSchema } from './utils/env';
 import { HealthModule } from '@modules/Health/health.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CargoModule } from '@modules/Cargo/cargo.module';
+import { TrackingModule } from '@modules/Tracking/tracking.module';
 import { createDataSource } from '@config/data.source';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
@@ -29,7 +29,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
     AuthModule,
     TenantModule,
     HealthModule,
-    CargoModule,
+    TrackingModule,
   ],
   providers: [
     {

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-export class CreateCargoDto {
+export class CreateTrackingDto {
   @ApiProperty({
     example: 'TRK-000001',
     description: 'Unique tracking code of the cargo',

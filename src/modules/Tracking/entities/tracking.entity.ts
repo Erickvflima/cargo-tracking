@@ -1,12 +1,13 @@
 import { BaseEntity } from '@common/dataBase/base.entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, VersionColumn } from 'typeorm';
 
 @Entity({
-  name: 'cargo',
+  name: 'tracking',
 })
-export class CargoEntity extends BaseEntity {
+export class TrackingEntity extends BaseEntity {
   @Column({
     name: 'tracking_code',
+    unique: true,
     length: 50,
   })
   trackingCode: string;
@@ -15,4 +16,7 @@ export class CargoEntity extends BaseEntity {
     length: 50,
   })
   status: string;
+
+  @VersionColumn()
+  version: number;
 }

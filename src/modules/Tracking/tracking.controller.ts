@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -6,17 +15,18 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CargoService } from './cargo.service';
+import { TrackingService } from './tracking.service';
 import { AuthenticatedRequest } from '@interface/iAuthenticatedUser';
-import { CreateCargoDto } from './dto/create-cargo.dto';
+import { CreateTrackingDto } from './dto/create-tracking.dto';
 import { Roles } from '@common/decorators/roles.decorator';
 import { UserRole } from '@common/enums/roles';
+import { UpdateTrackingStatusDto } from './dto/update-tracking-status.dto';
 
-@ApiTags('Cargo')
+@ApiTags('Tracking')
 @ApiBearerAuth('access-token')
-@Controller('cargo')
-export class CargoController {
-  constructor(private readonly cargoService: CargoService) {}
+@Controller('tracking')
+export class TrackingController {
+  constructor(private readonly trackingService: TrackingService) {}
 
   @Post()
   @Roles(UserRole.ADMIN, UserRole.OPERATOR)
@@ -33,8 +43,11 @@ export class CargoController {
     status: 401,
     description: 'Unauthorized.',
   })
-  async create(@Req() req: AuthenticatedRequest, @Body() data: CreateCargoDto) {
-    return this.cargoService.create(req.user.tenantId, req.user.email, data);
+  async create(
+    @Req() req: AuthenticatedRequest,
+    @Body() data: CreateTrackingDto,
+  ) {
+    return this.trackingService.create(req.user.tenantId, req.user.email, data);
   }
 
   @Get()
@@ -60,9 +73,23 @@ export class CargoController {
     description: 'Unauthorized.',
   })
   async findAll(@Req() req: AuthenticatedRequest, @Query('id') id?: string) {
-    return this.cargoService.findAll(
+    return this.trackingService.findAll(
       req.user.tenantId,
       id ? Number(id) : undefined,
+    );
+  }
+  @Put(':trackingCode/status')
+  @Roles(UserRole.ADMIN)
+  async updateStatus(
+    @Param('trackingCode') trackingCode: string,
+    @Req() req: AuthenticatedRequest,
+    @Body() data: UpdateTrackingStatusDto,
+  ) {
+    return this.trackingService.updateStatus(
+      req.user.tenantId,
+      req.user.email,
+      trackingCode,
+      data,
     );
   }
 }
