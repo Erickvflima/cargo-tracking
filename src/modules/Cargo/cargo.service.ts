@@ -3,8 +3,8 @@ import { CreateCargoDto } from './dto/create-cargo.dto';
 import { CargoEntity } from './entities/cargo.entity';
 import { IBaseResponse } from '@interface/baseResponse';
 import { TenantRepositoryFactory } from '@common/dataBase/tenant-repository.factory';
-import { TenantEntity } from '@modules/Tenant/entities/tenant.entity';
 import { TenantService } from '@modules/Tenant/tenant.service';
+import { handleError } from '@common/errors/handle-error.util';
 
 @Injectable()
 export class CargoService {
@@ -28,40 +28,29 @@ export class CargoService {
     );
   }
 
-  async create({
-    userEmail,
-    data,
-    tenant,
-  }: {
-    userEmail: string;
-    data: CreateCargoDto;
-    tenant: TenantEntity;
-  }): Promise<IBaseResponse<CargoEntity>> {
+  async create(
+    tenantId: number,
+    userEmail: string,
+    data: CreateCargoDto,
+  ): Promise<IBaseResponse<CargoEntity>> {
     try {
-      const cargoRepository = await this.getCargoRepository(1);
-      // const cargo = cargoRepository.create({
-      //   ...data,
-      //   createdBy: userEmail,
-      // });
+      const cargoRepository = await this.getCargoRepository(tenantId);
 
-      // await this.cargoRepository
-      //   .createQueryBuilder()
-      //   .insert()
-      //   .into(`$.cargo`)
-      //   .values(cargo)
-      //   .execute();
+      const cargo = cargoRepository.create({
+        ...data,
+        createdBy: userEmail,
+      });
+
+      const savedCargo = await cargoRepository.save(cargo);
 
       return {
         status: 'success',
-        message: 'cargo created successfully',
+        message: 'Cargo created successfully',
+        document: savedCargo,
       };
     } catch (error) {
       Logger.error(error);
-
-      return {
-        status: 'error',
-        message: 'Failed to create cargo',
-      };
+      throw handleError(error, 'Failed to create cargo');
     }
   }
 
@@ -81,7 +70,7 @@ export class CargoService {
       return {
         status: 'success',
         message: 'Cargos found successfully',
-        data: cargos,
+        document: cargos,
       };
     } catch (error) {
       Logger.error(error);

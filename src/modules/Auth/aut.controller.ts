@@ -7,9 +7,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { SignupDto } from './dto/signup.dto';
 import { AuthService } from './auth.service';
 import { SigninDto } from './dto/signin.dto';
+import { SignupDto } from './dto/signup.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -18,25 +18,29 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  @ApiOperation({ summary: 'Cadastro de usuário' })
+  @ApiOperation({
+    summary: 'Register a new user',
+    description:
+      'Creates a new user associated with the provided tenant and returns a JWT access token.',
+  })
   @ApiOkResponse({
-    description: 'Usuário cadastrado com sucesso',
+    description: 'User registered successfully.',
     schema: {
       example: {
         status: 'success',
-        message: 'Usuário autenticado com sucesso',
+        message: 'User authenticated successfully',
         data: {
-          accessToken: 'jwt_token',
+          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         },
       },
     },
   })
   @ApiBadRequestResponse({
-    description: 'Usuário já existe',
+    description: 'Invalid tenant or user already exists.',
     schema: {
       example: {
         status: 'error',
-        message: 'Usuário já existe',
+        message: 'User already exists',
       },
     },
   })
@@ -46,25 +50,29 @@ export class AuthController {
 
   @Public()
   @Post('signin')
-  @ApiOperation({ summary: 'Login do usuário' })
+  @ApiOperation({
+    summary: 'Authenticate user',
+    description:
+      'Authenticates the user credentials and returns a JWT access token containing the user and tenant identification.',
+  })
   @ApiOkResponse({
-    description: 'Login realizado com sucesso',
+    description: 'User authenticated successfully.',
     schema: {
       example: {
         status: 'success',
-        message: 'Usuário autenticado com sucesso',
+        message: 'User authenticated successfully',
         data: {
-          accessToken: 'jwt_token',
+          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkXVCJ9...',
         },
       },
     },
   })
   @ApiUnauthorizedResponse({
-    description: 'Usuário não encontrado',
+    description: 'Invalid credentials or inactive/invalid tenant.',
     schema: {
       example: {
         status: 'error',
-        message: 'Usuário não encontrado',
+        message: 'Invalid username or password',
       },
     },
   })
