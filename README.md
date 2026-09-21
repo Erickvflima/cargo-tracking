@@ -100,3 +100,136 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+----------------------------------------------------------------
+
+## Migrations e Inicialização do Banco
+
+O projeto utiliza migrations separadas para o schema central `dbo` e para os schemas dos tenants.
+
+A execução deve respeitar a seguinte ordem:
+
+### 1. Migration do `dbo`
+
+Primeiro devem ser executadas as migrations responsáveis pela estrutura central da aplicação:
+
+```bash
+yarn migration-dbo:run
+```
+
+Essa etapa é responsável por:
+
+* Criar as tabelas do schema `dbo`;
+* Criar a tabela `dbo.tenants`;
+* Criar a tabela `dbo.User`;
+* Criar os schemas dos tenants definidos no seed inicial;
+* Popular a tabela `dbo.tenants` com os clientes iniciais.
+
+Após essa etapa, a estrutura central estará disponível para identificar os tenants que deverão receber as migrations específicas.
+
+### 2. Migration dos tenants
+
+Com os tenants criados no `dbo`, devem ser executadas as migrations dos schemas dos clientes:
+
+```bash
+yarn tenant:migrate --all
+```
+
+O comando consulta os tenants ativos cadastrados em `dbo.tenants` e executa as migrations individualmente em cada schema.
+
+Exemplo:
+
+```text
+dbo.tenants
+    │
+    ├── tenant_001
+    ├── tenant_002
+    ├── tenant_003
+    ├── ...
+    └── tenant_010
+```
+
+Cada tenant possui seu próprio histórico de migrations e suas próprias tabelas.
+
+Por exemplo:
+
+```text
+tenant_001.migrations
+tenant_001.tracking
+
+tenant_002.migrations
+tenant_002.tracking
+
+tenant_003.migrations
+tenant_003.tracking
+```
+
+Isso permite que a evolução do banco dos tenants seja controlada independentemente do schema central.
+
+### Ordem completa
+
+Para uma instalação inicial do projeto, executar:
+
+```bash
+yarn migration-dbo:run
+```
+
+e depois:
+
+```bash
+yarn tenant:migrate --all
+```
+
+A ordem é importante porque os tenants precisam existir no `dbo.tenants` antes que o runner possa localizá-los e executar suas respectivas migrations.
+
+### Execução para um único tenant
+
+Também é possível executar as migrations de apenas um tenant:
+
+```bash
+yarn tenant:migrate --tenant=tenant_001
+```
+
+Isso é útil durante o desenvolvimento ou quando uma migration precisa ser validada isoladamente.
+
+### Migrations iniciais
+
+As migrations atualmente presentes no projeto foram inicialmente criadas como parte da configuração e validação do mecanismo de migrations e multi-tenancy.
+
+Portanto, os dados presentes nos seeds iniciais têm finalidade de **configuração inicial e teste da infraestrutura**, servindo para validar:
+
+* Criação do schema `dbo`;
+* Criação dos tenants;
+* Criação dinâmica dos schemas dos clientes;
+* Execução das migrations nos diferentes tenants;
+* Isolamento das tabelas entre os schemas;
+* Execução de migrations e seeds de forma independente por tenant.
+
+Esses dados iniciais não representam uma carga de produção.
+
+### Fluxo da arquitetura
+
+```text
+                    DATABASE
+                       │
+                       │
+                    dbo
+                       │
+              ┌────────┴────────┐
+              │                 │
+           tenants             User
+              │
+              │ identifica
+              │ os tenants
+              ▼
+      ┌───────┼────────┬────────┐
+      ▼       ▼        ▼        ▼
+ tenant_001 tenant_002 ... tenant_010
+      │         │                 │
+      ▼         ▼                 ▼
+  tracking  tracking          tracking
+      │         │                 │
+ migrations migrations       migrations
+```
+
+O `dbo` funciona como a estrutura central da aplicação, enquanto os schemas `tenant_*` armazenam os dados específicos de cada cliente.
