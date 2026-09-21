@@ -10,7 +10,8 @@ export const createDataSource = (config: ConfigService): DataSourceOptions => ({
   database: config.get<string>('DB_DATABASE'),
   schema: 'dbo',
   entities: [`${__dirname}/../**/*.entity.{js,ts}`],
-  migrations: [`${__dirname}/../migrations/*.{js,ts}`],
+  synchronize: false,
+  logging: ['error'],
   options: {
     encrypt: false,
     trustServerCertificate: true,
