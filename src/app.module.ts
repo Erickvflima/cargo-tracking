@@ -11,6 +11,7 @@ import { AuthModule } from '@modules/Auth/auth.module';
 import { TenantModule } from '@modules/Tenant/tenant.module';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { GeolocationModule } from '@modules/Geolocation/geolocation.module';
+import { TrackingHistoryModule } from '@modules/TrackingHistory/trackingHistory.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { GeolocationModule } from '@modules/Geolocation/geolocation.module';
     TenantModule,
     HealthModule,
     TrackingModule,
+    TrackingHistoryModule,
     GeolocationModule,
   ],
   providers: [

@@ -1,4 +1,5 @@
 import { TrackingEntity } from '@modules/Tracking/entities/tracking.entity';
+import { TrackingHistoryEntity } from '@modules/TrackingHistory/entities/trackingHistory.entity';
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
 
@@ -11,7 +12,7 @@ export const createTenantDataSource = (schema: string): DataSource => {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     schema,
-    entities: [TrackingEntity],
+    entities: [TrackingEntity, TrackingHistoryEntity],
     migrations: [`${__dirname}/../database/migrations/tenant/*.ts`],
     synchronize: false,
     logging: ['error'],

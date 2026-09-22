@@ -11,12 +11,14 @@ import { TenantRepositoryFactory } from '@common/dataBase/tenant-repository.fact
 import { TenantService } from '@modules/Tenant/tenant.service';
 import { handleError } from '@common/errors/handle-error.util';
 import { UpdateTrackingStatusDto } from './dto/update-tracking-status.dto';
+import { TrackingHistoryService } from '@modules/TrackingHistory/trackingHistory.service';
 
 @Injectable()
 export class TrackingService {
   constructor(
     private readonly tenantRepositoryFactory: TenantRepositoryFactory,
     private readonly tenantService: TenantService,
+    private readonly trackingHistoryService: TrackingHistoryService,
   ) {}
 
   private async getTrackingRepository(tenantId: number) {
@@ -141,6 +143,15 @@ export class TrackingService {
       if (!updatedTracking) {
         throw new NotFoundException('Tracking not found.');
       }
+
+      await this.trackingHistoryService.create(
+        tenantId,
+        userEmail,
+        trackingCode,
+        {
+          status: data.status,
+        },
+      );
 
       return {
         status: 'success',

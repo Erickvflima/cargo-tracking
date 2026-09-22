@@ -78,6 +78,7 @@ export class TrackingController {
       id ? Number(id) : undefined,
     );
   }
+
   @Put(':trackingCode/status')
   @Roles(UserRole.ADMIN)
   async updateStatus(
