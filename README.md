@@ -1,235 +1,476 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Cargo Tracking API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST para gerenciamento e rastreamento de cargas, desenvolvida como parte do teste técnico para Desenvolvedor Back-end Sênior.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A solução foi construída com foco em **organização arquitetural, isolamento de dados por cliente, segurança, concorrência, rastreabilidade e capacidade de evolução**.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 1. Tecnologias
 
-# cargo-tracking
-This project aims to create a small cargo tracking management system.
+### Backend
 
+* **Node.js**
+* **NestJS**
+* **TypeScript**
+* **TypeORM**
+* **SQL Server**
+* **JWT**
+* **Jest**
+* **Swagger/OpenAPI**
 
-## Project setup
+### Infraestrutura e suporte
 
-```bash
-$ yarn install
+* **Docker / Docker Compose**
+* **Redis**
+* **AWS** — arquitetura proposta
+* **ECR**
+* **ECS**
+* **ALB**
+* **RDS**
+* **ElastiCache / Redis ou Valkey**
+* **S3**
+* **CloudWatch**
+* **Route 53**
+* **CloudFront**
+
+---
+
+## 2. Principais características
+
+A aplicação possui:
+
+* API REST para gerenciamento de cargas;
+* autenticação baseada em JWT;
+* autorização baseada em perfil;
+* arquitetura multi-tenant;
+* isolamento dos dados dos clientes por schema;
+* controle de concorrência otimista;
+* histórico de alterações de status;
+* validação dos dados de entrada;
+* tratamento padronizado de erros;
+* integração preparada para geolocalização;
+* mecanismos de cache, retry e fallback;
+* migrations independentes para o banco central e tenants;
+* testes automatizados;
+* documentação através de Swagger;
+* arquitetura preparada para execução em containers na AWS.
+
+---
+
+## 3. Arquitetura Multi-Tenant
+
+A aplicação utiliza uma estratégia de **schema por tenant**.
+
+O schema `dbo` concentra as informações globais da aplicação, enquanto cada cliente possui seu próprio schema.
+
+```text
+SQL Server
+│
+├── dbo
+│   ├── tenants
+│   └── User
+│
+├── tenant_001
+│   ├── tracking
+│   └── tracking_history
+│
+├── tenant_002
+│   ├── tracking
+│   └── tracking_history
+│
+└── ...
 ```
 
-## Compile and run the project
+O tenant é identificado durante o processo de autenticação e utilizado para determinar em qual schema os dados devem ser acessados.
 
-```bash
-# development
-$ yarn run start
+Fluxo simplificado:
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+```text
+Request
+   │
+   ▼
+JWT
+   │
+   ▼
+tenantId
+   │
+   ▼
+TenantService
+   │
+   ▼
+schemaName
+   │
+   ▼
+TenantRepositoryFactory
+   │
+   ▼
+Schema do Tenant
 ```
 
-## Run tests
+Essa abordagem mantém os dados de cada cliente isolados e permite que a evolução das estruturas dos tenants seja controlada individualmente.
 
-```bash
-# unit tests
-$ yarn run test
+---
 
-# e2e tests
-$ yarn run test:e2e
+## 4. Estrutura da aplicação
 
-# test coverage
-$ yarn run test:cov
+A aplicação está organizada em módulos, seguindo a separação de responsabilidades do NestJS.
+
+```text
+src/
+├── auth/
+├── tenant/
+├── tracking/
+├── tracking-history/
+├── geolocation/
+├── common/
+├── database/
+└── config/
 ```
 
-## Deployment
+A aplicação utiliza abstrações de acesso a dados para evitar que as regras de negócio dependam diretamente da implementação específica do banco.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 5. Tracking
 
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+O módulo de tracking é responsável pelo gerenciamento das cargas.
+
+Entre as informações armazenadas estão:
+
+* código da carga;
+* status;
+* origem;
+* destino;
+* data de partida;
+* previsão de entrega;
+* localização atual;
+* versão do registro para controle de concorrência.
+
+---
+
+## 6. Atualização de Status e Concorrência
+
+A alteração de status utiliza **concorrência otimista** através do campo `version`.
+
+A atualização somente é realizada quando a versão enviada pelo cliente ainda corresponde à versão atual do registro.
+
+```text
+Cliente
+   │
+   │ status + version
+   ▼
+API
+   │
+   ▼
+UPDATE ... WHERE version = X
+   │
+   ├── Atualizado
+   │      └── version + 1
+   │
+   └── Nenhum registro atualizado
+          └── HTTP 409 Conflict
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Após uma alteração de status, uma ocorrência correspondente é registrada no histórico da carga.
 
-## Resources
+Essa estratégia evita que uma atualização feita por um usuário sobrescreva silenciosamente uma alteração realizada por outro usuário.
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 7. Histórico
 
-## Support
+O módulo `TrackingHistory` mantém o histórico das ocorrências relacionadas às cargas.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+O histórico permite registrar informações como:
 
-## Stay in touch
+* carga relacionada;
+* status;
+* data da ocorrência;
+* localização;
+* observação;
+* usuário responsável pela operação.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+A relação entre `tracking` e `tracking_history` é mantida dentro do schema específico do tenant.
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 8. Geolocalização
 
-----------------------------------------------------------------
+A aplicação possui uma estrutura preparada para integração com provedores externos de geolocalização.
 
-## Migrations e Inicialização do Banco
+A arquitetura considera mecanismos como:
 
-O projeto utiliza migrations separadas para o schema central `dbo` e para os schemas dos tenants.
+* adapter/provider;
+* timeout;
+* retry;
+* backoff;
+* cache;
+* fallback;
+* logs e métricas.
 
-A execução deve respeitar a seguinte ordem:
+A integração pode evoluir posteriormente para diferentes provedores sem acoplar a regra de negócio diretamente à API externa.
 
-### 1. Migration do `dbo`
+---
 
-Primeiro devem ser executadas as migrations responsáveis pela estrutura central da aplicação:
+## 9. Banco de Dados e Migrations
+
+As migrations são separadas entre o schema central e os schemas dos tenants.
+
+### Schema central
 
 ```bash
 yarn migration-dbo:run
 ```
 
-Essa etapa é responsável por:
-
-* Criar as tabelas do schema `dbo`;
-* Criar a tabela `dbo.tenants`;
-* Criar a tabela `dbo.User`;
-* Criar os schemas dos tenants definidos no seed inicial;
-* Popular a tabela `dbo.tenants` com os clientes iniciais.
-
-Após essa etapa, a estrutura central estará disponível para identificar os tenants que deverão receber as migrations específicas.
-
-### 2. Migration dos tenants
-
-Com os tenants criados no `dbo`, devem ser executadas as migrations dos schemas dos clientes:
+### Todos os tenants
 
 ```bash
 yarn tenant:migrate --all
 ```
 
-O comando consulta os tenants ativos cadastrados em `dbo.tenants` e executa as migrations individualmente em cada schema.
-
-Exemplo:
-
-```text
-dbo.tenants
-    │
-    ├── tenant_001
-    ├── tenant_002
-    ├── tenant_003
-    ├── ...
-    └── tenant_010
-```
-
-Cada tenant possui seu próprio histórico de migrations e suas próprias tabelas.
-
-Por exemplo:
-
-```text
-tenant_001.migrations
-tenant_001.tracking
-
-tenant_002.migrations
-tenant_002.tracking
-
-tenant_003.migrations
-tenant_003.tracking
-```
-
-Isso permite que a evolução do banco dos tenants seja controlada independentemente do schema central.
-
-### Ordem completa
-
-Para uma instalação inicial do projeto, executar:
-
-```bash
-yarn migration-dbo:run
-```
-
-e depois:
-
-```bash
-yarn tenant:migrate --all
-```
-
-A ordem é importante porque os tenants precisam existir no `dbo.tenants` antes que o runner possa localizá-los e executar suas respectivas migrations.
-
-### Execução para um único tenant
-
-Também é possível executar as migrations de apenas um tenant:
+### Tenant específico
 
 ```bash
 yarn tenant:migrate --tenant=tenant_001
 ```
 
-Isso é útil durante o desenvolvimento ou quando uma migration precisa ser validada isoladamente.
+Para uma instalação inicial, a ordem deve ser:
 
-### Migrations iniciais
-
-As migrations atualmente presentes no projeto foram inicialmente criadas como parte da configuração e validação do mecanismo de migrations e multi-tenancy.
-
-Portanto, os dados presentes nos seeds iniciais têm finalidade de **configuração inicial e teste da infraestrutura**, servindo para validar:
-
-* Criação do schema `dbo`;
-* Criação dos tenants;
-* Criação dinâmica dos schemas dos clientes;
-* Execução das migrations nos diferentes tenants;
-* Isolamento das tabelas entre os schemas;
-* Execução de migrations e seeds de forma independente por tenant.
-
-Esses dados iniciais não representam uma carga de produção.
-
-### Fluxo da arquitetura
-
-```text
-                    DATABASE
-                       │
-                       │
-                    dbo
-                       │
-              ┌────────┴────────┐
-              │                 │
-           tenants             User
-              │
-              │ identifica
-              │ os tenants
-              ▼
-      ┌───────┼────────┬────────┐
-      ▼       ▼        ▼        ▼
- tenant_001 tenant_002 ... tenant_010
-      │         │                 │
-      ▼         ▼                 ▼
-  tracking  tracking          tracking
-      │         │                 │
- migrations migrations       migrations
+```bash
+yarn migration-dbo:run
+yarn tenant:migrate --all
 ```
 
-O `dbo` funciona como a estrutura central da aplicação, enquanto os schemas `tenant_*` armazenam os dados específicos de cada cliente.
+O primeiro comando cria a estrutura central e os tenants iniciais. O segundo executa as migrations específicas em cada schema.
+
+Mais detalhes sobre migrations, seeds e inicialização estão disponíveis em:
+
+`SupplementaryReadMe.md`
+
+---
+
+## 10. Execução local
+
+### Pré-requisitos
+
+* Node.js
+* Yarn
+* Docker
+* Docker Compose
+
+### Instalação
+
+Clone o projeto e instale as dependências:
+
+```bash
+yarn install
+```
+
+Suba os serviços necessários:
+
+```bash
+docker compose up -d
+```
+
+Configure as variáveis de ambiente conforme o arquivo de exemplo do projeto.
+
+Execute as migrations:
+
+```bash
+yarn migration-dbo:run
+yarn tenant:migrate --all
+```
+
+Inicie a aplicação em desenvolvimento:
+
+```bash
+yarn start:dev
+```
+
+---
+
+## 11. Swagger
+
+Após iniciar a aplicação, a documentação da API pode ser acessada através do Swagger.
+
+```text
+/api-docs
+```
+
+O Swagger permite visualizar os endpoints, parâmetros, DTOs e mecanismos de autenticação disponíveis.
+
+---
+
+## 12. Testes
+
+Os testes automatizados podem ser executados através dos scripts definidos no projeto.
+
+Exemplo:
+
+```bash
+yarn test
+```
+
+Os testes abrangem principalmente regras relacionadas a:
+
+* tracking;
+
+Ficando como ponto de melhoria inserir os teste para:
+
+* atualização de status;
+* concorrência;
+* isolamento entre tenants;
+* validações;
+* histórico;
+* integrações externas.
+
+---
+
+## 13. Arquitetura AWS
+
+A arquitetura de produção foi projetada considerando execução baseada em containers:
+
+```text
+                    Route 53
+                       │
+                       ▼
+                   CloudFront
+                       │
+                       ▼
+                      ALB
+                       │
+                       ▼
+                 ECS / Containers
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+       RDS SQL      Redis/Valkey     S3
+          │
+          ▼
+      SQL Server
+
+             CloudWatch
+          Observabilidade
+```
+
+A proposta considera ambientes independentes de **Homologação** e **Produção**, com recursos dimensionados inicialmente para baixo custo e possibilidade de evolução conforme métricas reais de utilização.
+
+A documentação detalhada da arquitetura de infraestrutura está disponível em:
+
+`InfrastructureArchitecture.md`
+
+---
+
+## 14. CI/CD
+
+O pipeline de CI/CD está sendo estruturado para automatizar as principais etapas de validação e construção da aplicação.
+
+Fluxo previsto:
+
+```text
+Commit
+  │
+  ▼
+Lint
+  │
+  ▼
+Tests
+  │
+  ▼
+Build
+  │
+  ▼
+Docker Build
+  │
+  ▼
+Container Registry
+```
+
+A estratégia de deploy e os detalhes do pipeline serão documentados separadamente.
+
+---
+
+## 15. Documentação
+
+A documentação do projeto está dividida em diferentes níveis.
+
+### README.md
+
+Visão geral, tecnologias e instruções para execução.
+
+### SupplementaryReadMe.md
+
+Detalhamento dos fluxos da aplicação, banco de dados, segurança, concorrência, histórico, testes e decisões técnicas.
+
+### InfrastructureArchitecture.md
+
+Arquitetura de infraestrutura e proposta de execução na AWS.
+
+### Architecture / ADRs
+
+Documentação das principais decisões arquiteturais através de diagramas e Architecture Decision Records.
+
+---
+
+## 16. Melhorias futuras
+
+Alguns pontos foram mantidos fora do escopo atual para preservar o foco da implementação, mas foram considerados na arquitetura.
+
+### State Machine dinâmica
+
+Implementar uma máquina de estados configurável através do banco de dados, permitindo que as transições válidas de status sejam alteradas sem modificar o código da aplicação.
+
+### Correlation ID
+
+Adicionar um identificador único para cada requisição, permitindo acompanhar o fluxo da operação entre API, banco, cache e integrações externas.
+
+### Idempotência
+
+Implementar mecanismos de idempotência para operações críticas, evitando processamento duplicado em situações de retry, timeout ou reenvio da mesma requisição.
+
+### Auditoria e logs persistidos
+
+Criar uma tabela específica para persistência de logs de operações críticas, complementando os logs de aplicação e ferramentas de observabilidade.
+
+Esses registros poderiam armazenar informações como:
+
+* correlation ID;
+* usuário;
+* tenant;
+* método HTTP;
+* endpoint;
+* headers relevantes;
+* dados-chave da operação;
+* registro afetado;
+* mensagem de erro;
+* status HTTP;
+* data/hora da operação.
+
+Dados sensíveis, como tokens de autenticação e senhas, não devem ser persistidos.
+
+### Geolocalização completa
+
+Evoluir a integração para um provedor externo real, utilizando os mecanismos de resiliência já previstos na arquitetura.
+
+### Infraestrutura como código
+
+A utilização de Terraform pode ser adicionada posteriormente para automatizar o provisionamento dos recursos AWS.
+
+---
+
+## 17. Decisões de escopo
+
+O projeto prioriza a demonstração das principais decisões técnicas e dos requisitos funcionais do desafio.
+
+Algumas funcionalidades foram conscientemente mantidas como evolução futura para evitar aumento desnecessário da complexidade da implementação, mantendo a solução funcional, testável e coerente com o prazo proposto.
+
+As decisões e justificativas detalhadas estão documentadas nos arquivos complementares.
+
+---
+
+## 18. Resumo
+
+O projeto foi desenvolvido com foco em uma API de rastreamento de cargas preparada para múltiplos clientes, utilizando isolamento por schema, autenticação JWT, controle de concorrência otimista, histórico de alterações e arquitetura preparada para evolução em infraestrutura cloud.
+
+A implementação prioriza **separação de responsabilidades, isolamento de dados, resiliência e capacidade de evolução**, mantendo a complexidade compatível com o escopo do teste técnico.
