@@ -12,6 +12,7 @@ import { TenantModule } from '@modules/Tenant/tenant.module';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { GeolocationModule } from '@modules/Geolocation/geolocation.module';
 import { TrackingHistoryModule } from '@modules/TrackingHistory/trackingHistory.module';
+import { TrackingOverviewModule } from '@modules/TrackingOverview/tracking-overview.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TrackingHistoryModule } from '@modules/TrackingHistory/trackingHistory.
     TrackingModule,
     TrackingHistoryModule,
     GeolocationModule,
+    TrackingOverviewModule,
   ],
   providers: [
     {
