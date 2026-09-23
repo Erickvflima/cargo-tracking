@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InitDbo1789999164324 implements MigrationInterface {
-    name = 'InitDbo1789999164324'
+  name = 'InitDbo1789999164324';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE "tenants" (
                 "id" int NOT NULL IDENTITY(1, 1),
                 "created_at" datetime2 NOT NULL CONSTRAINT "DF_1dba291f7611c0f2388055c40b4" DEFAULT GETDATE(),
@@ -18,7 +18,7 @@ export class InitDbo1789999164324 implements MigrationInterface {
                 CONSTRAINT "PK_53be67a04681c66b87ee27c9321" PRIMARY KEY ("id")
             )
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "User" (
                 "id" int NOT NULL IDENTITY(1, 1),
                 "created_at" datetime2 NOT NULL CONSTRAINT "DF_162490c2439e0528260529d5563" DEFAULT GETDATE(),
@@ -33,15 +33,20 @@ export class InitDbo1789999164324 implements MigrationInterface {
                 CONSTRAINT "PK_9862f679340fb2388436a5ab3e4" PRIMARY KEY ("id")
             )
         `);
-    }
+    await queryRunner.query(`
+      ALTER TABLE "User"
+      ADD CONSTRAINT "FK_User_Tenant"
+      FOREIGN KEY ("tenant_id")
+      REFERENCES "tenants"("id")
+    `);
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             DROP TABLE "User"
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "tenants"
         `);
-    }
-
+  }
 }

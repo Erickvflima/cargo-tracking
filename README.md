@@ -474,3 +474,18 @@ As decisões e justificativas detalhadas estão documentadas nos arquivos comple
 O projeto foi desenvolvido com foco em uma API de rastreamento de cargas preparada para múltiplos clientes, utilizando isolamento por schema, autenticação JWT, controle de concorrência otimista, histórico de alterações e arquitetura preparada para evolução em infraestrutura cloud.
 
 A implementação prioriza **separação de responsabilidades, isolamento de dados, resiliência e capacidade de evolução**, mantendo a complexidade compatível com o escopo do teste técnico.
+
+## Uso de Inteligência Artificial
+
+Durante o desenvolvimento deste projeto foi utilizado o **OpenAI ChatGPT** como ferramenta de apoio à produtividade e otimização do processo de desenvolvimento.
+
+A IA foi utilizada principalmente para auxiliar em atividades como:
+
+* elaboração e revisão de partes verbosas da documentação;
+* apoio na criação e revisão de testes;
+* identificação de possíveis melhorias e inconsistências;
+* auxílio em tarefas repetitivas durante o desenvolvimento.
+
+As **decisões de arquitetura, padrões de desenvolvimento, modelagem, organização da aplicação, regras de negócio, estratégias de segurança e infraestrutura** foram definidas e validadas de forma independente pelo desenvolvedor, considerando os requisitos do projeto e os critérios técnicos adotados.
+
+A utilização da IA teve como objetivo **acelerar e apoiar o desenvolvimento**, mantendo a responsabilidade técnica, validação e decisão final sob responsabilidade do desenvolvedor.

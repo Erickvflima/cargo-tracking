@@ -1,5 +1,6 @@
 import { BaseEntity } from '@common/dataBase/base.entity';
-import { Column, Entity, Unique } from 'typeorm';
+import { UserEntity } from '@modules/User/entities/user.entity';
+import { Column, Entity, Unique, OneToMany } from 'typeorm';
 
 @Entity({ name: 'tenants', schema: 'dbo' })
 @Unique(['schemaName'])
@@ -12,4 +13,7 @@ export class TenantEntity extends BaseEntity {
 
   @Column({ default: true })
   active: boolean;
+
+  @OneToMany(() => UserEntity, (user) => user.tenant)
+  users: UserEntity[];
 }

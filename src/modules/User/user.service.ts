@@ -1,6 +1,7 @@
 import { UserRole } from '@common/enums/roles';
 import { handleError } from '@common/errors/handle-error.util';
 import { IBaseResponse } from '@interface/baseResponse';
+import { TenantEntity } from '@modules/Tenant/entities/tenant.entity';
 import { UserEntity } from '@modules/User/entities/user.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +13,8 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(TenantEntity)
+    private readonly tenantRepository: Repository<TenantEntity>,
   ) {}
 
   async create(
@@ -27,6 +30,16 @@ export class UserService {
 
       if (exists) {
         throw new BadRequestException('User already exists');
+      }
+      const tenant = await this.tenantRepository.findOne({
+        where: {
+          id: tenantId,
+          active: true,
+        },
+      });
+
+      if (!tenant) {
+        throw new BadRequestException('Tenant not found or inactive');
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);

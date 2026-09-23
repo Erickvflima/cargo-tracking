@@ -1,6 +1,7 @@
 import { BaseEntity } from '@common/dataBase/base.entity';
 import { UserRole } from '@common/enums/roles';
-import { Entity, Column, Unique } from 'typeorm';
+import { TenantEntity } from '@modules/Tenant/entities/tenant.entity';
+import { Entity, Column, Unique, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity({
   name: 'User',
@@ -18,6 +19,12 @@ export class UserEntity extends BaseEntity {
     name: 'tenant_id',
   })
   tenantId: number;
+
+  @ManyToOne(() => TenantEntity, (tenant) => tenant.users, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'tenant_id' })
+  tenant: TenantEntity;
 
   @Column({
     length: 20,
