@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
+import { TrackingService } from './tracking.service';
+import { TrackingEntity } from './entities/tracking.entity';
+
 jest.mock('@modules/Tenant/tenant.service', () => ({
   TenantService: class TenantService {},
 }));
@@ -7,9 +10,6 @@ jest.mock('@modules/Tenant/tenant.service', () => ({
 jest.mock('@common/errors/handle-error.util', () => ({
   handleError: jest.fn((error) => error),
 }));
-
-import { TrackingService } from './tracking.service';
-import { TrackingEntity } from './entities/tracking.entity';
 
 describe('TrackingService', () => {
   let trackingService: TrackingService;
@@ -20,6 +20,10 @@ describe('TrackingService', () => {
 
   let tenantService: {
     findById: ReturnType<typeof jest.fn>;
+  };
+
+  let trackingHistoryService: {
+    create: ReturnType<typeof jest.fn>;
   };
 
   let trackingRepository: {
@@ -38,6 +42,10 @@ describe('TrackingService', () => {
       findById: jest.fn(),
     };
 
+    trackingHistoryService = {
+      create: jest.fn(),
+    };
+
     trackingRepository = {
       findOne: jest.fn(),
       find: jest.fn(),
@@ -48,6 +56,7 @@ describe('TrackingService', () => {
     trackingService = new TrackingService(
       tenantRepositoryFactory as never,
       tenantService as never,
+      trackingHistoryService as never,
     );
 
     tenantRepositoryFactory.getRepository.mockImplementation(
@@ -71,19 +80,30 @@ describe('TrackingService', () => {
 
       const trackingData = {
         trackingCode: 'TRK-001',
+        originCity: 'Belo Horizonte',
+        originCountry: 'BR',
+        destinationCity: 'São Paulo',
+        destinationCountry: 'BR',
+        departureAt: '2026-09-24T08:00:00.000Z',
+        estimatedDeliveryAt: '2026-10-01T00:00:00.000Z',
         status: 'PENDING',
       };
 
       const createdTracking = {
         id: 1,
         trackingCode: 'TRK-001',
+        originCity: 'Belo Horizonte',
+        originCountry: 'BR',
+        destinationCity: 'São Paulo',
+        destinationCountry: 'BR',
+        departureAt: '2026-09-24T08:00:00.000Z',
+        estimatedDeliveryAt: '2026-10-01T00:00:00.000Z',
         status: 'PENDING',
         createdBy: 'user@test.com',
       };
 
       trackingRepository.create.mockReturnValue(createdTracking);
-
-      trackingRepository.save.mockImplementation(() => createdTracking);
+      trackingRepository.save.mockResolvedValue(createdTracking);
 
       const result = await trackingService.create(
         1,
@@ -111,8 +131,7 @@ describe('TrackingService', () => {
       });
 
       expect(trackingRepository.create).toHaveBeenCalledWith({
-        trackingCode: 'TRK-001',
-        status: 'PENDING',
+        ...trackingData,
         createdBy: 'user@test.com',
       });
 
@@ -145,7 +164,7 @@ describe('TrackingService', () => {
         },
       ];
 
-      trackingRepository.find.mockImplementation(() => trackings);
+      trackingRepository.find.mockResolvedValue(trackings);
 
       const result = await trackingService.findAll(1);
 
